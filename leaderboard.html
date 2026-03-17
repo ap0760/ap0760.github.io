@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thesis Leaderboard</title>
+    <style>
+        :root {
+            --gold: #f1c40f;
+            --silver: #bdc3c7;
+            --bronze: #e67e22;
+            --primary: #3498db;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #0f2027; /* Dark academic theme */
+            background: linear-gradient(to right, #2c5364, #203a43, #0f2027);
+            color: white;
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            padding: 50px 20px; 
+        }
+
+        .board { 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(10px);
+            padding: 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
+            width: 100%;
+            max-width: 500px; 
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        h2 { text-align: center; margin-bottom: 30px; font-weight: 300; letter-spacing: 2px; }
+
+        .entry { 
+            margin-bottom: 20px; 
+            animation: fadeIn 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
+        
+        .rank { font-weight: bold; font-size: 0.9em; width: 30px; }
+        .name { flex-grow: 1; font-weight: 500; }
+        .pages { font-family: monospace; color: var(--gold); }
+
+        /* Progress Bar Graphics */
+        .progress-bg { 
+            background: rgba(255,255,255,0.1); 
+            height: 12px; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            position: relative;
+        }
+
+        .progress-fill { 
+            height: 100%; 
+            background: var(--primary); 
+            width: 0%; 
+            transition: width 1.5s cubic-bezier(0.1, 0.5, 0.5, 1); 
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* Medal Colors */
+        .rank-1 .progress-fill { background: var(--gold); box-shadow: 0 0 15px var(--gold); }
+        .rank-2 .progress-fill { background: var(--silver); }
+        .rank-3 .progress-fill { background: var(--bronze); }
+
+        .form-link {
+            margin-top: 30px;
+            color: #ccc;
+            text-decoration: none;
+            font-size: 0.9em;
+            border-bottom: 1px dashed #666;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>THESIS RACE 2026</h2>
+
+    <div class="board" id="leaderboard">
+        </div>
+
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSfhhaaQHecZKOUPnA1DqLdfGuJrRj4lx3GicG3YyiUD6iWNsA/viewform?usp=dialog" class="form-link">Submit New Page Count →</a>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyniSlc95BS6pqShK4rsFuTK6_9IwQPjECPXq0WGYrKJM7p5m6PGQRNl1mv0RwSsQaRMw/exec';
+        const GOAL_PAGES = 100; // Change this to your thesis requirement
+
+        async function updateBoard() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                const container = document.getElementById('leaderboard');
+                container.innerHTML = '';
+
+                data.forEach((senior, index) => {
+                    const percentage = Math.min((senior.pages / GOAL_PAGES) * 100, 100);
+                    const entryHtml = `
+                        <div class="entry">
+                            <div class="info">
+                                <span class="name">${senior.name}</span>
+                                <span class="pages">${senior.pages} pages</span>
+                            </div>
+                            <div class="progress-bg">
+                                <div class="progress-fill" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += entryHtml;
+                });
+            } catch (e) {
+                document.getElementById('leaderboard').innerHTML = "Failed to load standings.";
+            }
+        }
+
+        updateBoard();
+        setInterval(updateBoard, 30000); // Auto-refresh every 30 seconds
+    </script>
+</body>
+</html>
